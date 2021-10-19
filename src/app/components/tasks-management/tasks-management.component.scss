@@ -1,0 +1,269 @@
+.dataCarCard {
+  margin: 2% 0;
+  box-shadow: none !important;
+
+  .mat-card-header {
+    margin-bottom: 10px;
+  }
+
+  &:nth-child(odd) {
+    background-color: #e1e9ff;
+  }
+
+  &:nth-child(even) {
+    background-color: #f2f5fd;
+  }
+
+  &.premiere-container {
+    box-shadow: none;
+    border-radius: 4px;
+    color: #fff;
+  }
+
+  &.border-light-green {
+    border: 1px solid #b9d6ba;
+  }
+  &.signature ::ng-deep {
+    .canvas_whiteboard_button {
+      padding-top: 2px;
+    }
+    .canvas_whiteboard_button-save {
+      margin-right: 20px;
+      padding-top: 2px;
+    }
+  }
+}
+
+.task-list-title {
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+.tasks-status {
+  background: rgba(255, 255, 255, 0.5) !important;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.change-log-stepper {
+  &.mat-stepper-horizontal,
+  &.mat-stepper-vertical {
+    background: transparent;
+    margin-bottom: 20px;
+  }
+
+  ::ng-deep {
+    .mat-step-icon-state-done {
+      background: #0091ff;
+    }
+
+    .mat-step-icon-state-number {
+      background: #ffb500;
+    }
+
+    .mat-horizontal-stepper-header,
+    .mat-vertical-stepper-header {
+      pointer-events: none;
+    }
+
+    .mat-horizontal-content-container,
+    .mat-vertical-content-container .mat-vertical-content {
+      display: none;
+    }
+
+    .mat-vertical-stepper-header {
+      height: auto !important;
+      align-items: unset !important;
+    }
+
+    .mat-vertical-stepper-content {
+      height: auto !important;
+      visibility: unset !important;
+    }
+
+    .mat-vertical-content {
+      display: block !important;
+    }
+  }
+}
+
+.task-status {
+  display: flex;
+}
+
+.sub-task-status {
+  padding-left: 2px;
+}
+
+.box-container {
+  //background: rgba(0, 18, 144, 0.125);
+  background: rgba(145, 155, 224, 0.2);
+  box-shadow: none;
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 20px;
+
+  .mat-card-title {
+    margin-bottom: 20px;
+    padding-top: 2px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .mat-icon {
+      margin-right: 5px;
+    }
+  }
+
+  .box-name {
+    display: flex;
+    align-items: center;
+  }
+
+  .mat-chip-list {
+    pointer-events: none;
+
+    .mat-chip {
+      color: #fff;
+      pointer-events: auto;
+      background: #f54b4b;
+
+      .mat-icon {
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+      }
+
+      &.has-reference {
+        background: #00a505;
+      }
+    }
+  }
+
+  &.returned {
+    .mat-chip-list .mat-chip {
+      pointer-events: auto;
+      background: rgba(0, 0, 0, 0.54);
+    }
+  }
+
+  &.not-ready {
+    .mat-chip-list .mat-chip {
+      pointer-events: auto;
+      background: #f54b4b;
+
+      &.has-reference {
+        background: #ffb100;
+      }
+    }
+  }
+}
+
+.manage-box {
+  button {
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
+}
+
+.box-receiver {
+  background: rgba(255, 255, 255, 0.65);
+  padding: 4px 8px;
+  margin-top: -5px;
+  width: 165px;
+  display: flex;
+
+  p {
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: right;
+    width: 100%;
+    margin: 1px 0 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+
+    &.no-receiver {
+      font-size: 0.875rem;
+      font-weight: normal;
+      opacity: 0.5;
+    }
+  }
+
+  .mat-icon {
+    margin-right: 4px;
+    font-size: 1.25rem;
+    margin-bottom: -2px;
+  }
+}
+
+.part-status-legend {
+  display: inline-block;
+  margin-right: 25px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+
+  .no-reference,
+  .pending,
+  .ready {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    border-radius: 50%;
+    vertical-align: bottom;
+    margin-right: 5px;
+  }
+  .no-reference {
+    background: #f54b4b;
+  }
+  .pending {
+    background: #ffb100;
+  }
+  .ready {
+    background: #00a505;
+  }
+}
+
+.task-status {
+  display: flex;
+}
+
+.sub-task-status {
+  padding-left: 2px;
+}
+
+.large-screen-table,
+.small-screen-table {
+  width: 100%;
+  min-width: unset;
+}
+
+.small-screen-table {
+  display: none;
+}
+
+@media only screen and (max-width: 700px) {
+  .small-screen-table {
+    display: table;
+  }
+
+  .large-screen-table {
+    display: none;
+  }
+}
+
+@media print {
+  .manage-task {
+    display: none;
+  }
+
+  .manage-box {
+    display: none;
+  }
+
+  .tasks-status {
+    padding: 0 20px;
+    margin-bottom: 0;
+  }
+}

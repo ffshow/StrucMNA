@@ -1,0 +1,372 @@
+<mat-card class="dataCarCard signature border-light-green" *ngIf="isSecondEstimation">
+  <mat-card-content>
+    <div>
+      <div *ngIf="!taskService.secondaryTasks[secondaryTaskOrdinal].signature">
+        <p>PAS ENCORE SIGNÉ</p>
+        <div style="height: 100px">
+          <canvas-whiteboard [options]="canvasOptions" (onSave)="onSaveSignature($event)">
+          </canvas-whiteboard>
+        </div>
+      </div>
+      <div *ngIf="taskService.secondaryTasks[secondaryTaskOrdinal].signature">
+        <p>
+          Signé par <b>{{taskService.secondaryTasks[secondaryTaskOrdinal].signedBy.id}}</b> à {{taskService.secondaryTasks[secondaryTaskOrdinal].signedAt | date: 'HH:mm le dd/MM/yyyy'}}
+        </p>
+        <img [src]="taskService.secondaryTasks[secondaryTaskOrdinal].signature">
+        <div style="text-align: right">
+          <app-confirm-button title="Voulez-vous supprimer la signature ?" [onOk]="onRemoveSignature()">
+            <button mat-icon-button color="warn" style="width: 150px">
+              Supprimer la signature
+            </button>
+          </app-confirm-button>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+<mat-card class="dataCarCard border-light-green">
+  <mat-card-header>
+    <mat-card-title>Tâche(s) à effectuer</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="tasks-status">
+      <h3 class="task-list-title" *ngIf="finishedTasksStatus.length > 0 || inProgressTasksStatus.length > 0">
+        Statut:</h3>
+      <mat-vertical-stepper [selectedIndex]="999999"
+                            *ngIf="finishedTasksStatus.length > 0 || inProgressTasksStatus.length > 0"
+                            [linear]="true" class="change-log-stepper">
+        <div *ngFor="let task of finishedTasksGroup">
+          <mat-step [editable]="false" [completed]="true" state="done">
+            <ng-template matStepLabel>{{task.taskType.name}}</ng-template>
+            <div class="task-status">
+              <div class="sub-task-status">
+                <div *ngFor="let subTask of task.subTasks">
+                  <mat-label><b> - {{subTask.subTaskType.name}}</b> - commencé à
+                    <b>{{subTask.startedAt | date: 'HH:mm le dd/MM/yyyy'}}</b> - fini à
+                    <b>{{subTask.finishedAt | date: 'HH:mm le dd/MM/yyyy'}}</b></mat-label>
+                </div>
+              </div>
+            </div>
+          </mat-step>
+        </div>
+        <div *ngFor="let task of inProgressTasksGroup">
+          <mat-step [editable]="false" [completed]="false" state="number">
+            <ng-template matStepLabel>{{task.taskType.name}}</ng-template>
+            <div class="task-status">
+              <div class="sub-task-status">
+                <div *ngFor="let subTask of task.subTasks">
+                  <mat-label *ngIf="subTask.startedAt"><b> - {{subTask.subTaskType.name}}</b><span> - commencé à </span><b>{{subTask.startedAt | date: 'HH:mm le dd/MM/yyyy'}}</b>
+                  </mat-label>
+                </div>
+              </div>
+            </div>
+          </mat-step>
+        </div>
+        <ng-template matStepperIcon="number">
+          <mat-icon>build</mat-icon>
+        </ng-template>
+      </mat-vertical-stepper>
+      <div *ngIf="notStartedTasks.length > 0">
+        <h3 class="task-list-title">En attente :</h3>
+        <ul>
+          <li *ngFor="let task of notStartedTasks"><b>{{task.taskType.name}}</b></li>
+        </ul>
+      </div>
+    </div>
+    <div *ngIf="editPermission && !isAbandoned && !isEditable" class="manage-task">
+      <mat-divider></mat-divider>
+      <br />
+      <h2>Contrôle de gestion</h2>
+      <h3 class="task-list-title">Terminé :</h3>
+      <div *ngIf="finishedTasks.length === 0">
+        <i>Aucune tâche</i>
+      </div>
+      <div *ngIf="finishedTasks.length > 0">
+        <table class="mat-table large-screen-table">
+          <tr *ngFor="let task of finishedTasks" class="mat-row">
+            <td class="mat-cell" style="width: 250px; padding-left: 10px;">{{task.taskType.name}}</td>
+            <td class="mat-cell"><span
+              style="margin-right: 10px">début :</span>{{task.startedAt | date: 'HH:mm le dd/MM/yyyy'}}</td>
+            <td class="mat-cell"><span
+              style="margin-right: 10px">fini :</span>{{task.finishedAt | date: 'HH:mm le dd/MM/yyyy'}}</td>
+            <td class="mat-cell" style="text-align: right" *ngIf="editPermission">
+              <ng-container *ngIf="!task.subTasks || task.subTasks.length === 0">
+                <app-confirm-button [onOk]="onRemoveFinishedTask(task.taskType.name, task.taskType.code)"
+                                    [header]="task.taskType.name"
+                                    title="Voulez-vous supprimer cette tâche en cours ?">
+                  <button mat-icon-button color="warn">
+                    <mat-icon>undo</mat-icon>
+                  </button>
+                </app-confirm-button>
+              </ng-container>
+              <ng-container *ngIf="task.subTasks && task.subTasks.length > 0">
+                <button mat-icon-button color="primary" (click)="onOpenSubTaskDialog(task)">
+                  <mat-icon>list_alt</mat-icon>
+                </button>
+              </ng-container>
+            </td>
+          </tr>
+        </table>
+        <table class="mat-table small-screen-table">
+          <ng-container *ngFor="let task of finishedTasks">
+            <tr class="mat-row">
+              <td class="mat-cell" colspan="2" style="padding-top: 5px; padding-left: 10px;">{{task.taskType.name}}</td>
+            </tr>
+            <tr class="mat-row">
+              <td class="mat-cell"><span style="margin-right: 10px; padding-left: 20px;">- début :</span></td>
+              <td class="mat-cell">{{task.startedAt | date: 'HH:mm le dd/MM/yyyy'}}</td>
+            </tr>
+            <tr class="mat-row" style="margin-bottom: 5px;">
+              <td class="mat-cell"><span style="margin-right: 10px; padding-left: 20px;">- fini :</span></td>
+              <td class="mat-cell">{{task.finishedAt | date: 'HH:mm le dd/MM/yyyy'}}</td>
+            </tr>
+            <tr class="mat-row">
+              <td class="mat-cell" colspan="2" style="text-align: right;" *ngIf="editPermission">
+                <ng-container *ngIf="!task.subTasks || task.subTasks.length === 0">
+                  <app-confirm-button [onOk]="onRemoveFinishedTask(task.taskType.name, task.taskType.code)"
+                                      [header]="task.taskType.name"
+                                      title="Voulez-vous supprimer cette tâche en cours ?">
+                    <button mat-icon-button color="warn">
+                      <mat-icon>undo</mat-icon>
+                    </button>
+                  </app-confirm-button>
+                </ng-container>
+                <ng-container *ngIf="task.subTasks && task.subTasks.length > 0">
+                  <button mat-icon-button color="primary" (click)="onOpenSubTaskDialog(task)">
+                    <mat-icon>list_alt</mat-icon>
+                  </button>
+                </ng-container>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3" style="height: 1px; background: #f2f5fd; padding: 0;"></td>
+            </tr>
+          </ng-container>
+        </table>
+      </div>
+      <br />
+      <h3 class="task-list-title">En cours :</h3>
+      <div *ngIf="inProgressTasks.length === 0">
+        <i>Aucune tâche</i>
+      </div>
+      <div *ngIf="inProgressTasks.length > 0">
+        <table class="mat-table large-screen-table">
+          <tr *ngFor="let task of inProgressTasks" class="mat-row">
+            <td class="mat-cell" style="width: 250px; padding-left: 10px;">{{task.taskType.name}}</td>
+            <td class="mat-cell"><span
+              style="margin-right: 10px">début :</span>{{task.startedAt | date: 'HH:mm le dd/MM/yyyy'}}</td>
+            <td class="mat-cell" style="text-align: right" *ngIf="editPermission">
+              <ng-container *ngIf="!task.subTasks || task.subTasks.length === 0">
+                <app-confirm-button [onOk]="onFinishTask(task.taskType.name, task.taskType.code)"
+                                    [header]="task.taskType.name"
+                                    title="Voulez-vous terminer cette tâche ?">
+                  <button mat-icon-button color="primary">
+                    <mat-icon>assignment_turned_in</mat-icon>
+                  </button>
+                </app-confirm-button>
+              </ng-container>
+              <ng-container *ngIf="task.subTasks && task.subTasks.length > 0">
+                <button mat-icon-button color="primary" (click)="onOpenSubTaskDialog(task)">
+                  <mat-icon>list_alt</mat-icon>
+                </button>
+              </ng-container>
+              <app-confirm-button [onOk]="onRemoveStartedTask(task.taskType.name, task.taskType.code)"
+                                  [header]="task.taskType.name"
+                                  title="Voulez-vous supprimer cette tâche en cours ?">
+                <button mat-icon-button color="warn">
+                  <mat-icon>undo</mat-icon>
+                </button>
+              </app-confirm-button>
+            </td>
+          </tr>
+        </table>
+        <table class="mat-table small-screen-table">
+          <ng-container *ngFor="let task of inProgressTasks">
+            <tr class="mat-row">
+              <td class="mat-cell" colspan="2" style="padding-top: 5px; padding-left: 10px;">{{task.taskType.name}}</td>
+            </tr>
+            <tr class="mat-row">
+              <td class="mat-cell"><span style="margin-left: 20px">- début :</span></td>
+              <td class="mat-cell">{{task.startedAt | date: 'HH:mm le dd/MM/yyyy'}}</td>
+            </tr>
+            <tr class="mat-row">
+              <td class="mat-cell" colspan="2" style="text-align: right" *ngIf="editPermission">
+                <ng-container *ngIf="!task.subTasks || task.subTasks.length === 0">
+                  <app-confirm-button [onOk]="onFinishTask(task.taskType.name, task.taskType.code)"
+                                      [header]="task.taskType.name"
+                                      title="Voulez-vous terminer cette tâche ?">
+                    <button mat-icon-button color="primary">
+                      <mat-icon>assignment_turned_in</mat-icon>
+                    </button>
+                  </app-confirm-button>
+                </ng-container>
+                <ng-container *ngIf="task.subTasks && task.subTasks.length > 0">
+                  <button mat-icon-button color="primary" (click)="onOpenSubTaskDialog(task)">
+                    <mat-icon>list_alt</mat-icon>
+                  </button>
+                </ng-container>
+                <app-confirm-button [onOk]="onRemoveStartedTask(task.taskType.name, task.taskType.code)"
+                                    [header]="task.taskType.name"
+                                    title="Voulez-vous supprimer cette tâche en cours ?">
+                  <button mat-icon-button color="warn">
+                    <mat-icon>undo</mat-icon>
+                  </button>
+                </app-confirm-button>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3" style="height: 1px; background: #f2f5fd; padding: 0;"></td>
+            </tr>
+          </ng-container>
+        </table>
+      </div>
+      <br />
+      <h3 class="task-list-title">En attente :</h3>
+      <div *ngIf="notStartedTasks.length === 0">
+        <i>Aucune tâche</i>
+      </div>
+      <ng-container *ngFor="let task of notStartedTasks">
+        <ng-container *ngIf="!task.subTasks || task.subTasks.length === 0">
+          <app-confirm-button [onOk]="onStartTask(task.taskType.name, task.taskType.code)"
+                              [header]="task.taskType.name"
+                              title="Voulez-vous démarrer cette tâche ?"
+                              style="margin-right: 10px; margin-bottom: 10px; display: inline-block;">
+            <button mat-flat-button color="accent" [disabled]="!editPermission">
+              <mat-icon inline style="margin-right: 5px">build</mat-icon>
+              {{task.taskType.name}}
+            </button>
+          </app-confirm-button>
+        </ng-container>
+        <ng-container *ngIf="task.subTasks && task.subTasks.length > 0">
+          <button mat-flat-button color="accent" [disabled]="!editPermission" (click)="onOpenSubTaskDialog(task)"
+                  style="margin-right: 10px; margin-bottom: 10px; display: inline-block;">
+            <mat-icon inline style="margin-right: 5px; font-size: 18px">list_alt</mat-icon>
+            {{task.taskType.name}}
+          </button>
+        </ng-container>
+      </ng-container>
+    </div>
+  </mat-card-content>
+</mat-card>
+<mat-card class="dataCarCard border-light-green" *ngIf="hasPartOrderTask">
+  <mat-card-header>
+    <mat-card-title>Pièce(s) commandée(s)</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p *ngIf="groupedPartOrdersByBox.length === 0 && unassignedPartOrders.length === 0"
+       style="text-align: center; margin-bottom: 10px">Pas encore de commande</p>
+    <mat-card class="box-container" *ngFor="let grouped of groupedPartOrdersByBox">
+      <mat-card-title>
+        <div class="box-name">
+          <mat-icon>inbox</mat-icon>
+          {{grouped.partBox.code}}</div>
+        <div class="box-receiver">
+          <mat-icon>transfer_within_a_station</mat-icon>
+          <p *ngIf="grouped.partBox.receiver">{{grouped.partBox.receiver}}</p>
+          <p class="no-receiver" *ngIf="!grouped.partBox.receiver">Pas de réceptionnaire</p>
+        </div>
+      </mat-card-title>
+      <mat-card-content>
+        <mat-chip-list>
+          <div *ngFor="let part of grouped.partOrders | forTask:'BODYWORK'">
+            <mat-chip [selectable]="false" [removable]="false" (click)="openPartRefDialog(part)"
+                      [class.has-reference]="!!part.reference">
+              <mat-icon>directions_car</mat-icon>
+              {{part.name}}
+            </mat-chip>
+          </div>
+        </mat-chip-list>
+        <div *ngIf="grouped.partOrders | hasTwoTask">
+          <br />
+          <mat-divider></mat-divider>
+          <br />
+        </div>
+        <mat-chip-list>
+          <div *ngFor="let part of grouped.partOrders | forTask:'MECHANICS'">
+            <mat-chip [selectable]="false" [removable]="false" (click)="openPartRefDialog(part)"
+                      [class.has-reference]="!!part.reference">
+              <mat-icon>handyman</mat-icon>
+              {{part.name}}
+            </mat-chip>
+          </div>
+        </mat-chip-list>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="box-container returned" *ngIf="returnedPartOrders && returnedPartOrders.length > 0">
+      <mat-card-title>Retour</mat-card-title>
+      <mat-card-content>
+        <mat-chip-list>
+          <div *ngFor="let part of returnedPartOrders | forTask:'BODYWORK'">
+            <mat-chip [selectable]="false" [removable]="false" (click)="openPartRefDialog(part)">
+              <mat-icon>directions_car</mat-icon>
+              {{part.name}}
+            </mat-chip>
+          </div>
+        </mat-chip-list>
+        <div *ngIf="returnedPartOrders | hasTwoTask">
+          <br />
+          <mat-divider></mat-divider>
+          <br />
+        </div>
+        <mat-chip-list>
+          <div *ngFor="let part of returnedPartOrders | forTask:'MECHANICS'">
+            <mat-chip [selectable]="false" [removable]="false" (click)="openPartRefDialog(part)"
+                      [class.has-reference]="!!part.reference">
+              <mat-icon>handyman</mat-icon>
+              {{part.name}}
+            </mat-chip>
+          </div>
+        </mat-chip-list>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="box-container not-ready" *ngIf="unassignedPartOrders && unassignedPartOrders.length > 0">
+      <mat-card-title>En attente de réception</mat-card-title>
+      <mat-card-content>
+        <mat-chip-list>
+          <div *ngFor="let part of unassignedPartOrders | forTask:'BODYWORK'">
+            <mat-chip [selectable]="false" [removable]="false" (click)="openPartRefDialog(part)"
+                      [class.has-reference]="!!part.reference">
+              <mat-icon>directions_car</mat-icon>
+              {{part.name}}
+            </mat-chip>
+          </div>
+        </mat-chip-list>
+        <div *ngIf="unassignedPartOrders | hasTwoTask">
+          <br />
+          <mat-divider></mat-divider>
+          <br />
+        </div>
+        <mat-chip-list>
+          <div *ngFor="let part of unassignedPartOrders | forTask:'MECHANICS'">
+            <mat-chip [selectable]="false" [removable]="false" (click)="openPartRefDialog(part)"
+                      [class.has-reference]="!!part.reference">
+              <mat-icon>handyman</mat-icon>
+              {{part.name}}
+            </mat-chip>
+          </div>
+        </mat-chip-list>
+      </mat-card-content>
+    </mat-card>
+    <div
+      *ngIf="(groupedPartOrdersByBox && groupedPartOrdersByBox.length > 0) || (unassignedPartOrders && unassignedPartOrders.length > 0)">
+      <mat-divider></mat-divider>
+      <div>
+        <div class="part-status-legend"><span class="no-reference"></span> Non référencée</div>
+        <div class="part-status-legend"><span class="pending"></span> En attente de réception</div>
+        <div class="part-status-legend"><span class="ready"></span> Reçu</div>
+      </div>
+    </div>
+    <div *ngIf="(partMngPermission || storeKeeperPermission) && !isAbandoned && !isEditable" class="manage-box">
+      <mat-divider></mat-divider>
+      <br />
+      <button mat-flat-button color="accent" (click)="onOrder()" *ngIf="partMngPermission">
+        <mat-icon>add_shopping_cart</mat-icon>
+        Commande de pièce(s)
+      </button>
+      <button mat-flat-button color="accent" (click)="onManageBox()" *ngIf="storeKeeperPermission">
+        <mat-icon>all_inbox</mat-icon>
+        Gestion bac(s)
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>
