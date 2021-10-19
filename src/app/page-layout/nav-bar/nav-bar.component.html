@@ -1,0 +1,99 @@
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <button mat-icon-button (click)="sidenav.close(); sidenavnoti.toggle(); onNotificationClick();" style="margin-right: 10px;">
+      <mat-icon>notifications</mat-icon>
+    </button>
+    <div class="brand">
+      <a [routerLink]="'/dashboard'">
+        <img src="assets/logo.png" class="logo"/>
+      </a>
+    </div>
+    <span class="menu-spacer"></span>
+    <div class="owner-filter-container" *ngIf="authService.checkAuthorized(['ROOT_ADMIN'])"
+         [class.has-selected-options]="owners && owners.length > 0">
+      <app-owner-select
+              [loading]="loading"
+              [owners]="owners"
+              [ownerOptions]="ownerOptions"
+              appearance="legacy"
+      (updateOwnersEvent)="onChangeOwners($event)">
+      </app-owner-select>
+    </div>
+    <div *ngIf="authService.isAuthenticated" class="btn-group">
+      <div class="search-bar-container">
+        <mat-search-bar [matAutocomplete]="auto" [(ngModel)]="searchingPlate" (ngModelChange)="searchPlate()" (onOpen)="sidenav.close()" #searchBar>
+          <mat-autocomplete #auto="matAutocomplete" panelWidth="250" (optionSelected)="onCarServiceSelected($event.option.value); searchBar.close()">
+            <mat-option *ngIf="searching" class="searching">
+              <mat-spinner diameter="20"></mat-spinner>
+            </mat-option>
+            <ng-container *ngIf="!searching">
+              <mat-option *ngFor="let option of carServiceOptions" [value]="option" [routerLink]="'/car-sheet/' + option.id">
+                {{displayCarService(option)}}
+              </mat-option>
+            </ng-container>
+          </mat-autocomplete>
+        </mat-search-bar>
+      </div>
+      <div class="action-button-container">
+        <a mat-stroked-button [routerLink]="'/dashboard'">Dashboard</a>
+        <a mat-stroked-button [matBadge]="readyCount" matBadgePosition="before" matBadgeColor="accent" [routerLink]="'/ready'" *ngIf="authService.checkAuthorized(['READ_ONLY', 'READ_WRITE', 'READ_WRITE_STATUS'])">Prêts</a>
+        <a mat-stroked-button [matBadge]="onGoingCount" matBadgePosition="before" matBadgeColor="accent" [routerLink]="'/on-going'" *ngIf="authService.checkAuthorized(['READ_ONLY', 'READ_WRITE', 'READ_WRITE_STATUS'])">V.O sur site</a>
+        <a mat-stroked-button [matBadge]="carRequestCount" matBadgePosition="before" matBadgeColor="accent" [routerLink]="'/create-request'" *ngIf="authService.checkAuthorized(['READ_ONLY', 'READ_WRITE', 'READ_WRITE_STATUS'])">Demandes d'enlèvements & SAV</a>
+        <a mat-flat-button [routerLink]="'/car-expertise'" *ngIf="authService.checkAuthorized(['READ_WRITE'])" style="background: #ef8700; color: white">Expertise</a>
+        <a mat-flat-button color="accent" [routerLink]="'/create-car'" *ngIf="authService.checkAuthorized(['READ_WRITE'])">Ajouter un véhicule</a>
+      </div>
+    </div>
+    <button mat-icon-button [hidden]="!authService.isAuthenticated" (click)="sidenavnoti.close(); sidenav.toggle();">
+      <mat-icon>menu</mat-icon>
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+<mat-sidenav-container (backdropClick)="close()" class="sidenav-container">
+  <mat-sidenav #sidenav position="end">
+    <mat-nav-list>
+      <div class="top-nav">
+        <div class="sidebar-action-button-container">
+          <a mat-list-item [routerLink]="'/create-car'" *ngIf="authService.checkAuthorized(['READ_WRITE'])" style="background: #ff4081; color: white"><mat-icon>add</mat-icon> Ajouter un véhicule</a>
+          <a mat-list-item [routerLink]="'/car-expertise'" *ngIf="authService.checkAuthorized(['READ_WRITE'])" style="background: #ef8700; color: white"><mat-icon>assignment</mat-icon> Expertise</a>
+          <a mat-list-item [routerLink]="'/dashboard'" (click)="sidenav.close()"><mat-icon>dashboard</mat-icon> Dashboard</a>
+          <a mat-list-item [routerLink]="'/ready'" *ngIf="authService.checkAuthorized(['READ_ONLY', 'READ_WRITE', 'READ_WRITE_STATUS'])">
+            <mat-icon>assignment_turned_in</mat-icon> <span [matBadge]="readyCount" matBadgePosition="above after" matBadgeColor="accent" matBadgeOverlap="false">Prêts</span>
+          </a>
+          <a mat-list-item [routerLink]="'/on-going'" *ngIf="authService.checkAuthorized(['READ_ONLY', 'READ_WRITE', 'READ_WRITE_STATUS'])">
+            <mat-icon>emoji_transportation</mat-icon> <span [matBadge]="onGoingCount" matBadgePosition="after" matBadgeColor="accent" matBadgeOverlap="false">V.O sur site</span>
+          </a>
+          <a mat-list-item [routerLink]="'/create-request'" *ngIf="authService.checkAuthorized(['READ_ONLY', 'READ_WRITE', 'READ_WRITE_STATUS'])">
+            <mat-icon>add_location_alt</mat-icon> <span [matBadge]="carRequestCount" matBadgePosition="after" matBadgeColor="accent" matBadgeOverlap="false">Demandes d'enlèvements</span>
+          </a>
+        </div>
+        <a mat-list-item [routerLink]="'/parts'" *ngIf="authService.checkAuthorized(['PARTS_MANAGEMENT', 'STORE_KEEPER'])"><mat-icon>all_inbox</mat-icon> Gestions des pièces détachées</a>
+        <a mat-list-item [routerLink]="'/role'" *ngIf="authService.checkAuthorized([])"><mat-icon>assignment_ind</mat-icon> Gestion des permissions</a>
+        <a mat-list-item [routerLink]="'/account'" *ngIf="authService.checkAuthorized([])"><mat-icon>people</mat-icon> Gestion des comptes</a>
+        <a mat-list-item [routerLink]="'/owner'" *ngIf="authService.checkAuthorized([])"><mat-icon>location_city</mat-icon> Gestion des propriétaires</a>
+        <a mat-list-item [routerLink]="'/employee'" *ngIf="authService.checkAuthorized([])"><mat-icon>recent_actors</mat-icon> Gestion des employés </a>
+        <a mat-list-item [routerLink]="'/pics-management'" *ngIf="authService.checkAuthorized(['PICS_UPLOAD'])"><mat-icon>add_a_photo</mat-icon> Ajout de photo(s)/vidéo(s) </a>
+        <a mat-list-item [routerLink]="'/qr-code-scanner'" (click)="sidenav.close()"><mat-icon>qr_code_scanner</mat-icon> Scanner le code QR </a>
+        <a mat-list-item [routerLink]="'/archive'" *ngIf="authService.checkAuthorized([])"><mat-icon>storage</mat-icon> Archives </a>
+        <a mat-list-item [routerLink]="'/statistics'" *ngIf="authService.checkAuthorized([])"><mat-icon>pie_chart</mat-icon> Statistiques </a>
+      </div>
+      <div class="bottom-nav">
+        <mat-divider></mat-divider>
+        <a mat-list-item [routerLink]="'/change-password'" (click)="sidenav.close()"><mat-icon>vpn_key</mat-icon> Changer le mot de passe</a>
+        <a mat-list-item (click)="logOut(); sidenav.close()"><mat-icon>exit_to_app</mat-icon> Déconnexion</a>
+      </div>
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav #sidenavnoti class="sidenav-noti">
+    <app-notifications [items]="items" [loading]="loadingNotification"></app-notifications>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <div>
+      <div class="checking-auth" *ngIf="authService.checkingAuth">
+        <mat-spinner diameter="35"></mat-spinner>
+      </div>
+      <div class="page-container" *ngIf="!authService.checkingAuth">
+        <router-outlet *ngIf="!authService.checkingAuth"></router-outlet>
+      </div>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

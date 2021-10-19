@@ -1,0 +1,245 @@
+.sidenav-noti {
+  width: 360px;
+}
+
+.mat-stroked-button {
+  margin-right: 16px !important;
+  border: solid 1px white !important;
+}
+
+.mat-flat-button {
+  margin-right: 16px !important;
+
+  &:nth-last-child(1) {
+    margin-right: 8px !important;
+  }
+}
+
+.mat-toolbar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.btn-group {
+  width: auto !important;
+  margin-left: auto !important;
+}
+
+.mat-drawer-container {
+  min-height: 100%;
+  padding-top: 64px;
+}
+
+.mat-sidenav {
+  min-width: 200px;
+  position: fixed;
+  top: 64px;
+  bottom: 0;
+}
+
+.mat-nav-list {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  padding-top: 0;
+
+  .top-nav {
+    flex: 1;
+    overflow: auto;
+  }
+
+  .bottom-nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .mat-list-item .mat-icon {
+    margin-right: 8px;
+    margin-top: -2px;
+  }
+}
+
+div.checking-auth {
+  position: fixed;
+  top: 64px;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+}
+
+.search-bar-container {
+  display: inline-block;
+  margin-right: 20px;
+  vertical-align: middle;
+
+  input {
+    font-size: 1rem !important;
+  }
+
+  ::ng-deep {
+    .mat-form-field {
+      height: 72px;
+    }
+    .mat-form-field-infix {
+      background: #4051b5;
+      padding-left: 15px;
+    }
+  }
+}
+
+.owner-filter-container {
+  ::ng-deep .mat-form-field-wrapper {
+    transition: 0.25s all;
+  }
+  &.has-selected-options ::ng-deep .mat-form-field-wrapper {
+    margin-bottom: -1.25em;
+  }
+}
+.action-button-container {
+  display: inline-block;
+}
+
+.sidebar-action-button-container {
+  display: none;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+
+  .logo {
+    height: 45px;
+    width: auto;
+    vertical-align: middle;
+    margin-right: 10px;
+  }
+}
+
+.page-container {
+  display: block;
+  padding: 32px 32px 64px;
+}
+
+.page-container ::ng-deep > * > .mat-card {
+  max-width: 1280px;
+  margin: auto;
+  box-shadow: 0px 2px 1px -3px rgba(0, 0, 0, 0.12),
+    0px 1px 1px 0px rgba(0, 0, 0, 0.12), 0px 1px 3px 0px rgba(0, 0, 0, 0.12) !important;
+
+  &.medium-card {
+    max-width: 1080px;
+  }
+}
+
+@media only screen and (max-width: 1250px) {
+  .search-bar-container {
+    margin-right: 10px;
+  }
+
+  .action-button-container {
+    display: none;
+  }
+
+  .sidebar-action-button-container {
+    display: block;
+  }
+
+  .page-container {
+    padding: 16px 16px 32px;
+  }
+
+  .page-container > .mat-card {
+    margin: 20px auto auto;
+  }
+
+  .owner-filter-container {
+    display: none !important;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .page-container {
+    padding: 0 0 32px;
+  }
+
+  .page-container > .mat-card {
+    margin: auto;
+  }
+}
+
+@media only screen and (max-width: 599px) {
+  .mat-drawer-container {
+    padding-top: 56px;
+  }
+
+  .mat-sidenav {
+    top: 56px;
+  }
+
+  div.checking-auth {
+    top: 56px;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .brand {
+    .title {
+      display: none;
+    }
+  }
+  .page-container {
+    padding: 0;
+  }
+}
+
+/* override styles when printing */
+@media print {
+  .mat-sidenav-content {
+    height: 100% !important;
+  }
+
+  .mat-toolbar {
+    display: none;
+  }
+
+  .mat-drawer-container {
+    padding-top: 0 !important;
+  }
+
+  .page-container {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .page-container ::ng-deep * {
+    visibility: visible;
+
+    .print-button,
+    .print-button * {
+      display: none !important;
+    }
+  }
+
+  .page-container ::ng-deep > * > .mat-card {
+    max-width: unset;
+    width: 100%;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+.owner-filter-container {
+  display: inline-block;
+  margin-left: 20px !important;
+  font-size: 15px;
+}

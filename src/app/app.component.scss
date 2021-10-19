@@ -1,0 +1,32 @@
+:host ::ng-deep {
+  .shadow {
+    box-shadow: 0 1px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0px rgba(0, 0, 0, 0.14), 0 1px 10px 0px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  :host ::ng-deep {
+    .mat-dialog-container {
+      position: relative;
+    }
+  }
+
+  .pointer {
+    cursor: pointer;
+  }
+}
+
+@media print {
+  :host ::ng-deep {
+    html, body {
+      height: 100%;
+    }
+
+    * {
+      visibility: hidden;
+    }
+  }
+}
+
+@page {
+  size: 210mm 297mm;
+  margin: 0;
+}
